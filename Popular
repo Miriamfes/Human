@@ -1,0 +1,28 @@
+var Core = function () {
+        var isReady = false,
+        timer = [],
+        modules = {},
+        libraries = {},
+        mainInterface = null;
+
+        var libraryList = function (libList){ 
+            $.each(libList, function (index, lib) {
+                libraries[lib.libraryName] = lib;
+                lib.pageConstructor = App[lib.pageConstructor];
+                lib.status = 'waiting';
+            });
+        }
+
+        var loadLibrary = function (libName, callback) {
+            var lib = libraries[libName];
+
+            if (!lib) throw new Error("Library not found");
+            if (lib.status == 'removed') throw new Error("Library is removed");
+            if (lib.status == 'waiting') {
+                Utils.LoadJS([{ library: lib.libraryPath, unload: true, GC: []}], callback);
+            }else if (lib.status == 'loaded'){
+                if ($.isFunction(callback)) {
+                    callback();
+                }
+            }
+        }
